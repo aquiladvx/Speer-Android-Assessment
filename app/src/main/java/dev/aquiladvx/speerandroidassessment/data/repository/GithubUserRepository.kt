@@ -4,6 +4,7 @@ import dev.aquiladvx.speerandroidassessment.common.fromJson
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubErrorBody
 import dev.aquiladvx.speerandroidassessment.data.network.GithubNetworkErrors
 import dev.aquiladvx.speerandroidassessment.data.network.GithubServiceApi
+import dev.aquiladvx.speerandroidassessment.ui.UserConnectionsState
 import dev.aquiladvx.speerandroidassessment.ui.UserProfileState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,6 +23,32 @@ class GithubUserRepository @Inject constructor(private val api: GithubServiceApi
             }
 
             return@withContext UserProfileState.Found(apiResponse.body()!!)
+        }
+    }
+
+    suspend fun fetchUserFollowers(username: String): UserConnectionsState {
+        return withContext(Dispatchers.IO) {
+            val apiResponse = api.fetchUserFollowers(username)
+
+            if (!apiResponse.isSuccessful || apiResponse.body() == null) {
+                val error = getGithubApiError(apiResponse.errorBody())
+                return@withContext UserConnectionsState.Error(error)
+            }
+
+            return@withContext UserConnectionsState.Found(apiResponse.body()!!)
+        }
+    }
+
+    suspend fun fetchUserFollowing(username: String): UserConnectionsState {
+        return withContext(Dispatchers.IO) {
+            val apiResponse = api.fetchUserFollowing(username)
+
+            if (!apiResponse.isSuccessful || apiResponse.body() == null) {
+                val error = getGithubApiError(apiResponse.errorBody())
+                return@withContext UserConnectionsState.Error(error)
+            }
+
+            return@withContext UserConnectionsState.Found(apiResponse.body()!!)
         }
     }
 

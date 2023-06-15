@@ -16,10 +16,27 @@ class GithubUserViewModel @Inject constructor(private val repository: GithubUser
     private val _userProfile = MutableLiveData<UserProfileState>()
     val userProfile: LiveData<UserProfileState> = _userProfile
 
+    private val _userConnections = MutableLiveData<UserConnectionsState>()
+    val userConnections: LiveData<UserConnectionsState> get() = _userConnections
+
     fun getUserProfile(username: String) = viewModelScope.launch {
         _userProfile.value = UserProfileState.Loading
         val response = repository.fetchUserProfile(username)
 
         _userProfile.value = response
+    }
+
+    fun getUserFollowers(username: String) = viewModelScope.launch {
+        _userConnections.value = UserConnectionsState.Loading
+        val response = repository.fetchUserFollowers(username)
+
+        _userConnections.value = response
+    }
+
+    fun getUserFollowing(username: String) = viewModelScope.launch {
+        _userConnections.value = UserConnectionsState.Loading
+        val response = repository.fetchUserFollowing(username)
+
+        _userConnections.value = response
     }
 }
