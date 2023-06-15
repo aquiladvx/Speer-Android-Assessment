@@ -7,4 +7,7 @@
     </plurals>
 
     <string name="following_content">%d following</string>
+    <string name="username_hint">enter a github username</string>
+    <string name="example_username">aquiladvx</string>
+    <string name="btn_search_action">search</string>
 </resources>
