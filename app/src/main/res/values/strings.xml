@@ -16,4 +16,5 @@
     <string name="unknown_host_message">Please check your internet connection and try again</string>
     <string name="ok">OK</string>
     <string name="error_dialog_title">Attention</string>
+    <string name="empty_searchbar_error_message">Enter a username to search</string>
 </resources>

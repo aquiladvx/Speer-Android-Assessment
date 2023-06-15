@@ -119,7 +119,7 @@ class UserProfileActivity : AppCompatActivity() {
         binding.etSearchUsername.hideKeyboard()
         val username = binding.etSearchUsername.text.toString()
         if (username.isEmpty()) {
-            toast("Enter a username to search")
+            toast(getString(R.string.empty_searchbar_error_message))
             return
         }
         getUserProfile(username)
