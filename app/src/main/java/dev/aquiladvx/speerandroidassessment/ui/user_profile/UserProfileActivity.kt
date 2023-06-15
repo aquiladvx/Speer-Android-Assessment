@@ -12,6 +12,7 @@ import dev.aquiladvx.speerandroidassessment.common.loadImage
 import dev.aquiladvx.speerandroidassessment.common.observe
 import dev.aquiladvx.speerandroidassessment.common.show
 import dev.aquiladvx.speerandroidassessment.common.showErrorMessage
+import dev.aquiladvx.speerandroidassessment.common.toast
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
 import dev.aquiladvx.speerandroidassessment.databinding.ActivityUserProfileBinding
 import dev.aquiladvx.speerandroidassessment.ui.user_connections.ConnectionsDialog
@@ -72,6 +73,7 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun hideLoading() {
         with(binding) {
+            srlUserProfile.isRefreshing = false
             sklProfile.slProfile.hideShimmer()
             sklProfile.slProfile.hide()
             profile.clProfile.show()
@@ -98,18 +100,29 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun setupUI() {
         with(binding) {
-            btnSearch.setOnClickListener { getUserProfile() }
+            btnSearch.setOnClickListener { onSearchListener() }
             profile.tvUserFollowers.setOnClickListener { showUserFollowersDialog() }
             profile.tvUserFollowing.setOnClickListener { showUserFollowingDialog() }
+            srlUserProfile.setOnRefreshListener { viewModel.refreshUserProfile() }
             etSearchUsername.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    getUserProfile()
+                    onSearchListener()
                     true
                 } else {
                     false
                 }
             }
         }
+    }
+
+    private fun onSearchListener() {
+        binding.etSearchUsername.hideKeyboard()
+        val username = binding.etSearchUsername.text.toString()
+        if (username.isEmpty()) {
+            toast("Enter a username to search")
+            return
+        }
+        getUserProfile(username)
     }
 
     private fun showConnectionsDialog(connectionsType: ConnectionsDialog.Companion.ConnectionType) {
@@ -129,13 +142,8 @@ class UserProfileActivity : AppCompatActivity() {
         showConnectionsDialog(ConnectionsDialog.Companion.ConnectionType.FOLLOWERS)
     }
 
-    private fun getUserProfile(username: String? = null) {
-        binding.etSearchUsername.hideKeyboard()
-        if (username == null) {
-            viewModel.getUserProfile(binding.etSearchUsername.text.toString())
-        } else {
-            viewModel.getUserProfile(username)
-        }
+    private fun getUserProfile(username: String) {
+        viewModel.getUserProfile(username)
     }
 
     private fun setObservers() {

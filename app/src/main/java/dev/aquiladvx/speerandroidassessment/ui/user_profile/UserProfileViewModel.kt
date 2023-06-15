@@ -27,5 +27,11 @@ class UserProfileViewModel @Inject constructor(private val repository: GithubUse
         _userProfile.value = response
     }
 
+    fun refreshUserProfile() = viewModelScope.launch {
+        username.value?.let {
+            getUserProfile(it)
+        }
+    }
+
 
 }
