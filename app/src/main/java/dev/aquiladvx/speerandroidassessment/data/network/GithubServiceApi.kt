@@ -22,4 +22,5 @@ interface GithubServiceApi {
         @Path("username") userName: String,
         @Query("page") page: Int,
     ): Response<List<GithubUserProfile>>
+
 }
