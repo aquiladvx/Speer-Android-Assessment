@@ -1,4 +1,4 @@
-package dev.aquiladvx.speerandroidassessment.ui
+package dev.aquiladvx.speerandroidassessment.ui.user_connections
 
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -7,15 +7,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import dagger.hilt.android.AndroidEntryPoint
 import dev.aquiladvx.speerandroidassessment.common.observe
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
 import dev.aquiladvx.speerandroidassessment.databinding.FragmentDialogConnectionsBinding
 import timber.log.Timber
 
-class ConnectionsDialog(private val connectionType: ConnectionType) : DialogFragment() {
+@AndroidEntryPoint
+class ConnectionsDialog(private val connectionType: ConnectionType, private val username: String) : DialogFragment() {
 
     companion object {
         enum class ConnectionType{
@@ -28,9 +29,10 @@ class ConnectionsDialog(private val connectionType: ConnectionType) : DialogFrag
     private val binding
         get() = _binding!!
 
-    private val viewModel: GithubUserViewModel by activityViewModels()
+    private val viewModel: UserConnectionsViewModel by viewModels()
 
     private lateinit var adapter: UserConnectionsAdapter
+    private var userClickListener: ((String) -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,30 +58,35 @@ class ConnectionsDialog(private val connectionType: ConnectionType) : DialogFrag
         }
     }
 
+    fun setOnUserClickListener(listener: (user: String) -> Unit): DialogFragment {
+        userClickListener = listener
+        return this
+    }
+
     private fun getUsersFollowing() {
         binding.tvConnectionType.text = connectionType.name
-        viewModel.getUserFollowing()
+        viewModel.getUserFollowing(username)
     }
 
     private fun getUsersFollowers() {
         binding.tvConnectionType.text = connectionType.name
-        viewModel.getUserFollowers()
+        viewModel.getUserFollowers(username)
     }
 
     private fun setObservers() {
         observe(viewModel.userConnections, ::userConnectionsObserver)
     }
 
-    private fun userConnectionsObserver(result: UserConnectionsState) {
+    private fun userConnectionsObserver(result: UserConnectionsUiState) {
         when (result) {
-            UserConnectionsState.Loading -> {
+            UserConnectionsUiState.Loading -> {
                 //TODO skeleton loading
                 Timber.d("loading")
             }
-            is UserConnectionsState.Found -> {
+            is UserConnectionsUiState.Found -> {
                 showUserConnections(result.userConnections)
             }
-            is UserConnectionsState.Error -> {
+            is UserConnectionsUiState.Error -> {
                 //TODO error dialog
                 Timber.tag("USER PROFILE ERROR").e(result.error.message)
             }
@@ -90,18 +97,17 @@ class ConnectionsDialog(private val connectionType: ConnectionType) : DialogFrag
         adapter.updateConnections(userConnections)
     }
 
-    private fun onUserConnectionClickListener(user: GithubUserProfile) {
-        viewModel.getUserProfile(user.login)
+    private fun onUserConnectionClickListener(username: String) {
+        userClickListener?.invoke(username)
         dismiss()
     }
 
     private fun setupUI() {
         setDialogSize()
-        viewModel.getUserFollowers()
 
         with(binding) {
             adapter = UserConnectionsAdapter()
-            adapter.setOnClickListener(::onUserConnectionClickListener)
+            adapter.setOnUserClickListener(::onUserConnectionClickListener)
             rvConnections.adapter = adapter
 
             btnClose.setOnClickListener { dismiss() }

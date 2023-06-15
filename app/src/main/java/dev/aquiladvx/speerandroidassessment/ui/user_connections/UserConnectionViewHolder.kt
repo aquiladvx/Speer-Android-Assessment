@@ -1,4 +1,4 @@
-package dev.aquiladvx.speerandroidassessment.ui
+package dev.aquiladvx.speerandroidassessment.ui.user_connections
 
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -8,7 +8,7 @@ import dev.aquiladvx.speerandroidassessment.databinding.HolderConnectionBinding
 class UserConnectionViewHolder(private val binding: HolderConnectionBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(user: GithubUserProfile, clickListener: ((GithubUserProfile) -> Unit)?) {
+    fun bind(user: GithubUserProfile, clickListener: ((String) -> Unit)?) {
         with(binding) {
             Glide
                 .with(itemView.context)
@@ -16,7 +16,7 @@ class UserConnectionViewHolder(private val binding: HolderConnectionBinding) :
                 .into(ivUserAvatar)
 
             tvUserUsername.text = user.login
-            clConnection.setOnClickListener { clickListener?.invoke(user) }
+            clConnection.setOnClickListener { clickListener?.invoke(user.login) }
         }
 
     }

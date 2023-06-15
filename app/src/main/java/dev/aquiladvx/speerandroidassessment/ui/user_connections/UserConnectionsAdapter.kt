@@ -1,4 +1,4 @@
-package dev.aquiladvx.speerandroidassessment.ui
+package dev.aquiladvx.speerandroidassessment.ui.user_connections
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -10,7 +10,7 @@ import timber.log.Timber
 class UserConnectionsAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var items = listOf<GithubUserProfile>()
-    private var userClickListener: ((GithubUserProfile) -> Unit)? = null
+    private var userClickListener: ((String) -> Unit)? = null
 
     fun updateConnections(messages: List<GithubUserProfile>) {
         val lastIndex = items.lastIndex
@@ -34,7 +34,7 @@ class UserConnectionsAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         (holder as UserConnectionViewHolder).bind(items[position], userClickListener)
     }
 
-    fun setOnClickListener(listener: (user: GithubUserProfile) -> Unit) {
+    fun setOnUserClickListener(listener: (user: String) -> Unit) {
         userClickListener = listener
     }
 }

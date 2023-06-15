@@ -1,4 +1,4 @@
-package dev.aquiladvx.speerandroidassessment.ui
+package dev.aquiladvx.speerandroidassessment.ui.user_profile
 
 import android.os.Bundle
 import androidx.activity.viewModels
@@ -11,47 +11,56 @@ import dev.aquiladvx.speerandroidassessment.common.observe
 import dev.aquiladvx.speerandroidassessment.common.show
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
 import dev.aquiladvx.speerandroidassessment.databinding.ActivityMainBinding
+import dev.aquiladvx.speerandroidassessment.ui.user_connections.ConnectionsDialog
 import timber.log.Timber
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class UserProfileActivity : AppCompatActivity() {
 
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: GithubUserViewModel by viewModels()
+    private val viewModel: UserProfileViewModel by viewModels()
 
-    private fun userProfileObserver(result: UserProfileState) {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+
+        setObservers()
+        setupUI()
+    }
+
+    private fun userProfileObserver(result: UserProfileUiState) {
         when (result) {
-            is UserProfileState.Loading -> {
+            is UserProfileUiState.Loading -> {
                 //TODO skeleton loading.
                 Timber.d("loading")
             }
 
-            is UserProfileState.Found -> {
-                setUserProfile(result.userProfile)
+            is UserProfileUiState.Found -> {
+                setUserProfileOnUi(result.userProfile)
             }
 
-            is UserProfileState.NotFound -> {
+            is UserProfileUiState.NotFound -> {
                 binding.profile.clProfile.hide()
                 binding.clNotFound.show()
             }
 
-            is UserProfileState.Error -> {
+            is UserProfileUiState.Error -> {
                 //TODO error dialog
                 Timber.tag("USER PROFILE ERROR").e(result.error.message)
             }
         }
     }
 
-    private fun setUserProfile(user: GithubUserProfile) {
+    private fun setUserProfileOnUi(user: GithubUserProfile) {
         binding.clNotFound.hide()
         binding.etSearchUsername.setText(user.login)
         with(binding.profile) {
             clProfile.show()
             Glide
-                .with(this@MainActivity)
+                .with(this@UserProfileActivity)
                 .load(user.avatarUrl)
                 .into(ivUserAvatar)
 
@@ -67,37 +76,37 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(binding.root)
-
-        setObservers()
-        setupUI()
-    }
-
     private fun setupUI() {
         with(binding) {
             btnSearch.setOnClickListener { getUserProfile() }
-            profile.tvUserFollowers.setOnClickListener { getUserFollowers() }
-            profile.tvUserFollowing.setOnClickListener { getUserFollowing() }
+            profile.tvUserFollowers.setOnClickListener { showUserFollowersDialog() }
+            profile.tvUserFollowing.setOnClickListener { showUserFollowingDialog() }
         }
     }
 
-    private fun getUserFollowing() {
+    private fun showConnectionDialog(connectionType: ConnectionsDialog.Companion.ConnectionType) {
         ConnectionsDialog(
-            ConnectionsDialog.Companion.ConnectionType.FOLLOWING
-        ).show(supportFragmentManager, ConnectionsDialog::class.java.name)
+            connectionType,
+            viewModel.username.value!!
+        )
+            .setOnUserClickListener(::getUserProfile)
+            .show(supportFragmentManager, ConnectionsDialog::class.java.name)
     }
 
-    private fun getUserFollowers() {
-        ConnectionsDialog(
-            ConnectionsDialog.Companion.ConnectionType.FOLLOWERS
-        ).show(supportFragmentManager, ConnectionsDialog::class.java.name)
+    private fun showUserFollowingDialog() {
+        showConnectionDialog(ConnectionsDialog.Companion.ConnectionType.FOLLOWING)
     }
 
-    private fun getUserProfile() {
-        val username = binding.etSearchUsername.text.toString()
-        viewModel.getUserProfile(username)
+    private fun showUserFollowersDialog() {
+        showConnectionDialog(ConnectionsDialog.Companion.ConnectionType.FOLLOWERS)
+    }
+
+    private fun getUserProfile(username: String? = null) {
+        if (username == null) {
+            viewModel.getUserProfile(binding.etSearchUsername.text.toString())
+        } else {
+            viewModel.getUserProfile(username)
+        }
     }
 
     private fun setObservers() {

@@ -4,8 +4,8 @@ import dev.aquiladvx.speerandroidassessment.common.fromJson
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubErrorBody
 import dev.aquiladvx.speerandroidassessment.data.network.GithubNetworkErrors
 import dev.aquiladvx.speerandroidassessment.data.network.GithubServiceApi
-import dev.aquiladvx.speerandroidassessment.ui.UserConnectionsState
-import dev.aquiladvx.speerandroidassessment.ui.UserProfileState
+import dev.aquiladvx.speerandroidassessment.ui.user_connections.UserConnectionsUiState
+import dev.aquiladvx.speerandroidassessment.ui.user_profile.UserProfileUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
@@ -13,46 +13,46 @@ import javax.inject.Inject
 
 class GithubUserRepository @Inject constructor(private val api: GithubServiceApi) {
 
-    suspend fun fetchUserProfile(username: String): UserProfileState {
+    suspend fun fetchUserProfile(username: String): UserProfileUiState {
         return withContext(Dispatchers.IO) {
             val apiResponse = api.fetchUserProfile(username)
 
             if (!apiResponse.isSuccessful || apiResponse.body() == null) {
                 val error = getGithubApiError(apiResponse.errorBody())
                 if (error == GithubNetworkErrors.NOT_FOUND) {
-                    return@withContext UserProfileState.NotFound
+                    return@withContext UserProfileUiState.NotFound
                 } else {
-                    return@withContext UserProfileState.Error(error)
+                    return@withContext UserProfileUiState.Error(error)
                 }
             }
 
-            return@withContext UserProfileState.Found(apiResponse.body()!!)
+            return@withContext UserProfileUiState.Found(apiResponse.body()!!)
         }
     }
 
-    suspend fun fetchUserFollowers(username: String): UserConnectionsState {
+    suspend fun fetchUserFollowers(username: String): UserConnectionsUiState {
         return withContext(Dispatchers.IO) {
             val apiResponse = api.fetchUserFollowers(username)
 
             if (!apiResponse.isSuccessful || apiResponse.body() == null) {
                 val error = getGithubApiError(apiResponse.errorBody())
-                return@withContext UserConnectionsState.Error(error)
+                return@withContext UserConnectionsUiState.Error(error)
             }
 
-            return@withContext UserConnectionsState.Found(apiResponse.body()!!)
+            return@withContext UserConnectionsUiState.Found(apiResponse.body()!!)
         }
     }
 
-    suspend fun fetchUserFollowing(username: String): UserConnectionsState {
+    suspend fun fetchUserFollowing(username: String): UserConnectionsUiState {
         return withContext(Dispatchers.IO) {
             val apiResponse = api.fetchUserFollowing(username)
 
             if (!apiResponse.isSuccessful || apiResponse.body() == null) {
                 val error = getGithubApiError(apiResponse.errorBody())
-                return@withContext UserConnectionsState.Error(error)
+                return@withContext UserConnectionsUiState.Error(error)
             }
 
-            return@withContext UserConnectionsState.Found(apiResponse.body()!!)
+            return@withContext UserConnectionsUiState.Found(apiResponse.body()!!)
         }
     }
 
