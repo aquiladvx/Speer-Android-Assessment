@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
     private fun userProfileObserver(result: UserProfileState) {
         when (result) {
             is UserProfileState.Loading -> {
-                //TODO skeleton loading
+                //TODO skeleton loading.
                 Timber.d("loading")
             }
 
