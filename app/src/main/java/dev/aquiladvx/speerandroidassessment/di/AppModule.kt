@@ -6,11 +6,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dev.aquiladvx.speerandroidassessment.BuildConfig
 import dev.aquiladvx.speerandroidassessment.common.Constants.GITHUB_API_BASE_URL
+import dev.aquiladvx.speerandroidassessment.data.network.GithubServiceApi
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
 import javax.inject.Singleton
 
 @Module
@@ -39,11 +41,19 @@ object AppModule {
         return okHttp
     }
 
+    @Singleton
+    @Provides
     fun provideRetrofit(client: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl(GITHUB_API_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideGithubApi(retrofit: Retrofit): GithubServiceApi {
+        return retrofit.create(GithubServiceApi::class.java)
     }
 }
