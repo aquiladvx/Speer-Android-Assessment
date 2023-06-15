@@ -5,16 +5,17 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
 import dev.aquiladvx.speerandroidassessment.databinding.HolderConnectionBinding
+import timber.log.Timber
 
 class UserConnectionsAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var items = listOf<GithubUserProfile>()
-
     private var userClickListener: ((GithubUserProfile) -> Unit)? = null
 
     fun updateConnections(messages: List<GithubUserProfile>) {
         val lastIndex = items.lastIndex
         items = messages
+        Timber.tag("notify").d("$lastIndex to ${items.lastIndex}")
         notifyItemRangeChanged(lastIndex, items.lastIndex)
     }
 
