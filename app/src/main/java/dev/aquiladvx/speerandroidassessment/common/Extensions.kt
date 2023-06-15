@@ -1,5 +1,7 @@
 package dev.aquiladvx.speerandroidassessment.common
 
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -7,6 +9,8 @@ import android.widget.EditText
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import com.google.gson.Gson
+import dev.aquiladvx.speerandroidassessment.R
+import dev.aquiladvx.speerandroidassessment.data.network.GithubNetworkErrors
 
 
 fun <T> LifecycleOwner.observe(liveData: LiveData<T>, action: (t: T) -> Unit) {
@@ -30,4 +34,14 @@ fun EditText.hideKeyboard() {
     clearFocus()
     val imm = context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(windowToken, 0)
+}
+
+fun Activity.showErrorMessage(error: GithubNetworkErrors) {
+    val builder = AlertDialog.Builder(this)
+    builder.setTitle(getString(R.string.error_dialog_title))
+    builder.setMessage(getString(error.userMessageId?: R.string.unknown_error_message))
+    builder.setPositiveButton(getString(R.string.ok)) { dialog, _ ->
+        dialog.dismiss()
+    }
+    builder.show()
 }

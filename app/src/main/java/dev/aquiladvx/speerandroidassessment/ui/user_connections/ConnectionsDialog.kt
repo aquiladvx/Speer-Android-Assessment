@@ -14,9 +14,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.aquiladvx.speerandroidassessment.common.hide
 import dev.aquiladvx.speerandroidassessment.common.observe
 import dev.aquiladvx.speerandroidassessment.common.show
+import dev.aquiladvx.speerandroidassessment.common.showErrorMessage
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
 import dev.aquiladvx.speerandroidassessment.databinding.FragmentDialogConnectionsBinding
-import timber.log.Timber
 
 @AndroidEntryPoint
 class ConnectionsDialog(private val connectionType: ConnectionType, private val username: String) :
@@ -102,8 +102,7 @@ class ConnectionsDialog(private val connectionType: ConnectionType, private val 
             }
 
             is UserConnectionsUiState.Error -> {
-                //TODO error dialog
-                Timber.tag("USER PROFILE ERROR").e(result.error.message)
+               requireActivity().showErrorMessage(result.error)
             }
 
         }

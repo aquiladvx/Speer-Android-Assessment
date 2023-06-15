@@ -11,4 +11,9 @@
     <string name="example_username">aquiladvx</string>
     <string name="btn_search_action">search</string>
     <string name="not_found_message">No user found</string>
+    <string name="bad_credentials_message">It looks like your credentials are not correct. Review the walkthrough in the project readme.</string>
+    <string name="unknown_error_message">We are having problems fetching your data. Please try again</string>
+    <string name="unknown_host_message">Please check your internet connection and try again</string>
+    <string name="ok">OK</string>
+    <string name="error_dialog_title">Attention</string>
 </resources>

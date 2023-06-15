@@ -11,10 +11,11 @@ import dev.aquiladvx.speerandroidassessment.common.hide
 import dev.aquiladvx.speerandroidassessment.common.hideKeyboard
 import dev.aquiladvx.speerandroidassessment.common.observe
 import dev.aquiladvx.speerandroidassessment.common.show
+import dev.aquiladvx.speerandroidassessment.common.showErrorMessage
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
+import dev.aquiladvx.speerandroidassessment.data.network.GithubNetworkErrors
 import dev.aquiladvx.speerandroidassessment.databinding.ActivityUserProfileBinding
 import dev.aquiladvx.speerandroidassessment.ui.user_connections.ConnectionsDialog
-import timber.log.Timber
 
 @AndroidEntryPoint
 class UserProfileActivity : AppCompatActivity() {
@@ -50,9 +51,8 @@ class UserProfileActivity : AppCompatActivity() {
             }
 
             is UserProfileUiState.Error -> {
-                //TODO error dialog
                 hideLoading()
-                Timber.tag("USER PROFILE ERROR").e(result.error.message)
+                showErrorMessage(result.error)
             }
         }
     }
