@@ -4,7 +4,11 @@ import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
 import dev.aquiladvx.speerandroidassessment.data.network.GithubNetworkErrors
 
 sealed class UserConnectionsUiState {
-    object Loading: UserConnectionsUiState()
+    object NotFound : UserConnectionsUiState()
     class Found(val userConnections: List<GithubUserProfile>) : UserConnectionsUiState()
-    class Error(val error: GithubNetworkErrors): UserConnectionsUiState()
+    class Error(val error: GithubNetworkErrors) : UserConnectionsUiState()
+    sealed class Loading : UserConnectionsUiState() {
+        object FromEmpty : Loading()
+        object FromData : Loading()
+    }
 }

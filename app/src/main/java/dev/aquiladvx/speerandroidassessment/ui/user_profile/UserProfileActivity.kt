@@ -1,12 +1,14 @@
 package dev.aquiladvx.speerandroidassessment.ui.user_profile
 
 import android.os.Bundle
+import android.view.inputmethod.EditorInfo
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
 import dev.aquiladvx.speerandroidassessment.R
 import dev.aquiladvx.speerandroidassessment.common.hide
+import dev.aquiladvx.speerandroidassessment.common.hideKeyboard
 import dev.aquiladvx.speerandroidassessment.common.observe
 import dev.aquiladvx.speerandroidassessment.common.show
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
@@ -44,8 +46,7 @@ class UserProfileActivity : AppCompatActivity() {
 
             is UserProfileUiState.NotFound -> {
                 hideLoading()
-                binding.profile.clProfile.hide()
-                binding.clNotFound.show()
+                showNotFoundView()
             }
 
             is UserProfileUiState.Error -> {
@@ -56,8 +57,14 @@ class UserProfileActivity : AppCompatActivity() {
         }
     }
 
+    private fun showNotFoundView() {
+        binding.profile.clProfile.hide()
+        binding.layoutNotFound.clNotFound.show()
+    }
+
     private fun showLoading() {
         with(binding) {
+            layoutNotFound.clNotFound.hide()
             sklProfile.slProfile.startShimmer()
             sklProfile.slProfile.show()
             profile.clProfile.hide()
@@ -73,7 +80,7 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun setUserProfileOnUi(user: GithubUserProfile) {
-        binding.clNotFound.hide()
+        binding.layoutNotFound.clNotFound.hide()
         binding.etSearchUsername.setText(user.login)
         with(binding.profile) {
             clProfile.show()
@@ -99,6 +106,14 @@ class UserProfileActivity : AppCompatActivity() {
             btnSearch.setOnClickListener { getUserProfile() }
             profile.tvUserFollowers.setOnClickListener { showUserFollowersDialog() }
             profile.tvUserFollowing.setOnClickListener { showUserFollowingDialog() }
+            etSearchUsername.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    getUserProfile()
+                    true
+                } else {
+                    false
+                }
+            }
         }
     }
 
@@ -120,6 +135,7 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun getUserProfile(username: String? = null) {
+        binding.etSearchUsername.hideKeyboard()
         if (username == null) {
             viewModel.getUserProfile(binding.etSearchUsername.text.toString())
         } else {

@@ -36,9 +36,9 @@ class GithubUserRepository @Inject constructor(private val api: GithubServiceApi
         }
     }
 
-    suspend fun fetchUserFollowers(username: String): UserConnectionsUiState {
+    suspend fun fetchUserFollowers(username: String, page: Int): UserConnectionsUiState {
         return withContext(Dispatchers.IO) {
-            val apiResponse = api.fetchUserFollowers(username)
+            val apiResponse = api.fetchUserFollowers(username, page)
 
             if (!apiResponse.isSuccessful || apiResponse.body() == null) {
                 val error = getGithubApiError(apiResponse.errorBody())
@@ -49,9 +49,9 @@ class GithubUserRepository @Inject constructor(private val api: GithubServiceApi
         }
     }
 
-    suspend fun fetchUserFollowing(username: String): UserConnectionsUiState {
+    suspend fun fetchUserFollowing(username: String, page: Int): UserConnectionsUiState {
         return withContext(Dispatchers.IO) {
-            val apiResponse = api.fetchUserFollowing(username)
+            val apiResponse = api.fetchUserFollowing(username, page)
 
             if (!apiResponse.isSuccessful || apiResponse.body() == null) {
                 val error = getGithubApiError(apiResponse.errorBody())

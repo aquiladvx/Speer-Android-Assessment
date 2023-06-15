@@ -9,17 +9,21 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
+import dev.aquiladvx.speerandroidassessment.common.hide
 import dev.aquiladvx.speerandroidassessment.common.observe
+import dev.aquiladvx.speerandroidassessment.common.show
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
 import dev.aquiladvx.speerandroidassessment.databinding.FragmentDialogConnectionsBinding
 import timber.log.Timber
 
 @AndroidEntryPoint
-class ConnectionsDialog(private val connectionType: ConnectionType, private val username: String) : DialogFragment() {
+class ConnectionsDialog(private val connectionType: ConnectionType, private val username: String) :
+    DialogFragment() {
 
     companion object {
-        enum class ConnectionType{
+        enum class ConnectionType {
             FOLLOWERS,
             FOLLOWING
         }
@@ -33,6 +37,7 @@ class ConnectionsDialog(private val connectionType: ConnectionType, private val 
 
     private lateinit var adapter: UserConnectionsAdapter
     private var userClickListener: ((String) -> Unit)? = null
+    private lateinit var getUserConnections: ((reset: Boolean) -> Unit)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,10 +57,16 @@ class ConnectionsDialog(private val connectionType: ConnectionType, private val 
         super.onViewCreated(view, savedInstanceState)
         setObservers()
         setupUI()
-        when(connectionType) {
-            ConnectionType.FOLLOWERS -> getUsersFollowers()
-            ConnectionType.FOLLOWING -> getUsersFollowing()
+        getUserConnections = when (connectionType) {
+            ConnectionType.FOLLOWERS -> {
+                ::getUsersFollowers
+            }
+
+            ConnectionType.FOLLOWING -> {
+                ::getUsersFollowing
+            }
         }
+        getUserConnections(false)
     }
 
     fun setOnUserClickListener(listener: (user: String) -> Unit): DialogFragment {
@@ -63,14 +74,14 @@ class ConnectionsDialog(private val connectionType: ConnectionType, private val 
         return this
     }
 
-    private fun getUsersFollowing() {
+    private fun getUsersFollowing(reset: Boolean = false) {
         binding.tvConnectionType.text = connectionType.name
-        viewModel.getUserFollowing(username)
+        viewModel.getUserFollowing(username, reset)
     }
 
-    private fun getUsersFollowers() {
+    private fun getUsersFollowers(reset: Boolean = false) {
         binding.tvConnectionType.text = connectionType.name
-        viewModel.getUserFollowers(username)
+        viewModel.getUserFollowers(username, reset)
     }
 
     private fun setObservers() {
@@ -79,21 +90,51 @@ class ConnectionsDialog(private val connectionType: ConnectionType, private val 
 
     private fun userConnectionsObserver(result: UserConnectionsUiState) {
         when (result) {
-            UserConnectionsUiState.Loading -> {
-                //TODO skeleton loading
-                Timber.d("loading")
-            }
+            is UserConnectionsUiState.Loading.FromData -> showPageLoading()
+
+            is UserConnectionsUiState.Loading.FromEmpty -> showLoading()
+
+            is UserConnectionsUiState.NotFound -> showNotFoundView()
+
             is UserConnectionsUiState.Found -> {
+                hideLoading()
                 showUserConnections(result.userConnections)
             }
+
             is UserConnectionsUiState.Error -> {
                 //TODO error dialog
                 Timber.tag("USER PROFILE ERROR").e(result.error.message)
             }
+
+        }
+    }
+
+    private fun showNotFoundView() {
+        hideLoading()
+        binding.layoutNotFound.clNotFound.show()
+    }
+
+    private fun showLoading() {
+        binding.srUserConnections.isRefreshing = true
+    }
+
+    private fun showPageLoading() {
+        with(binding) {
+            sklUserConnections.startShimmer()
+            sklUserConnections.show()
+        }
+    }
+
+    private fun hideLoading() {
+        with(binding) {
+            srUserConnections.isRefreshing = false
+            sklUserConnections.hideShimmer()
+            sklUserConnections.hide()
         }
     }
 
     private fun showUserConnections(userConnections: List<GithubUserProfile>) {
+        binding.layoutNotFound.clNotFound.hide()
         adapter.updateConnections(userConnections)
     }
 
@@ -104,13 +145,28 @@ class ConnectionsDialog(private val connectionType: ConnectionType, private val 
 
     private fun setupUI() {
         setDialogSize()
+        setupAdapter()
+        with(binding) {
+            btnClose.setOnClickListener { dismiss() }
+            srUserConnections.setOnRefreshListener { getUserConnections(true) }
+        }
+        binding.btnClose.setOnClickListener { dismiss() }
+    }
 
+    private fun setupAdapter() {
         with(binding) {
             adapter = UserConnectionsAdapter()
             adapter.setOnUserClickListener(::onUserConnectionClickListener)
             rvConnections.adapter = adapter
 
-            btnClose.setOnClickListener { dismiss() }
+            rvConnections.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (!recyclerView.canScrollVertically(1)) {
+                        getUserConnections(false)
+                    }
+                }
+            })
         }
     }
 
@@ -128,7 +184,6 @@ class ConnectionsDialog(private val connectionType: ConnectionType, private val 
                     height
                 )
             }
-
         }
     }
 
