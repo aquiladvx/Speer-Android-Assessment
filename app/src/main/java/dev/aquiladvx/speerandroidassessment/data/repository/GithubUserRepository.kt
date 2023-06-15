@@ -19,7 +19,11 @@ class GithubUserRepository @Inject constructor(private val api: GithubServiceApi
 
             if (!apiResponse.isSuccessful || apiResponse.body() == null) {
                 val error = getGithubApiError(apiResponse.errorBody())
-                return@withContext UserProfileState.Error(error)
+                if (error == GithubNetworkErrors.NOT_FOUND) {
+                    return@withContext UserProfileState.NotFound
+                } else {
+                    return@withContext UserProfileState.Error(error)
+                }
             }
 
             return@withContext UserProfileState.Found(apiResponse.body()!!)

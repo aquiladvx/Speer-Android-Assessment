@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Speer Android Assessment</string>
+
+    <plurals name="followers_content">
+        <item quantity="one">%s follower</item>
+        <item quantity="other">%s followers</item>
+    </plurals>
+
+    <string name="following_content">%d following</string>
 </resources>

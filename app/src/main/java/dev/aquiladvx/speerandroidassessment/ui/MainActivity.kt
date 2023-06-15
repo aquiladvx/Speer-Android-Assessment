@@ -2,9 +2,13 @@ package dev.aquiladvx.speerandroidassessment.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.viewModels
+import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
+import dev.aquiladvx.speerandroidassessment.R
 import dev.aquiladvx.speerandroidassessment.common.observe
+import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
 import dev.aquiladvx.speerandroidassessment.databinding.ActivityMainBinding
 import timber.log.Timber
 
@@ -24,11 +28,11 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 is UserProfileState.Found -> {
-                    Timber.tag("result").d(result.userProfile.toString())
+                    setUserProfile(result.userProfile)
                 }
 
                 is UserProfileState.NotFound -> {
-                    Timber.tag("result").d("not found")
+                    Toast.makeText(this, "not found", Toast.LENGTH_SHORT).show()
                 }
 
                 is UserProfileState.Error -> {
@@ -37,11 +41,37 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
+    private fun setUserProfile(user: GithubUserProfile) {
+       with(binding.profile) {
+           Glide.with(this@MainActivity).load(user.avatarUrl)
+               .into(ivUserAvatar)
+
+           tvUserName.text = user.name
+           tvUserUsername.text = user.login
+           tvUserDescription.text = user.bio
+           tvUserFollowers.text = resources.getQuantityString(R.plurals.followers_content, user.followers, user.followers)
+           tvUserFollowing.text = getString(R.string.following_content, user.following)
+       }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        setObservers()
+        setupUI()
+    }
+
+    private fun setupUI() {
+        binding.btnSearch.setOnClickListener { searchUser() }
+    }
+
+    private fun searchUser() {
+        val username = binding.etSearchUsername.text.toString()
+        viewModel.getUserProfile(username)
+    }
+
+    private fun setObservers() {
         observe(viewModel.userProfile, ::userProfileObserver)
-        viewModel.getUserProfile("aquiladvx")
     }
 }
