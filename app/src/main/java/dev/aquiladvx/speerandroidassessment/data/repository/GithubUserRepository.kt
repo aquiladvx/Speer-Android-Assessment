@@ -9,24 +9,30 @@ import dev.aquiladvx.speerandroidassessment.ui.user_profile.UserProfileUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
+import java.lang.Exception
 import javax.inject.Inject
 
 class GithubUserRepository @Inject constructor(private val api: GithubServiceApi) {
 
     suspend fun fetchUserProfile(username: String): UserProfileUiState {
         return withContext(Dispatchers.IO) {
-            val apiResponse = api.fetchUserProfile(username)
+            try {
 
-            if (!apiResponse.isSuccessful || apiResponse.body() == null) {
-                val error = getGithubApiError(apiResponse.errorBody())
-                if (error == GithubNetworkErrors.NOT_FOUND) {
-                    return@withContext UserProfileUiState.NotFound
-                } else {
-                    return@withContext UserProfileUiState.Error(error)
+                val apiResponse = api.fetchUserProfile(username)
+
+                if (!apiResponse.isSuccessful || apiResponse.body() == null) {
+                    val error = getGithubApiError(apiResponse.errorBody())
+                    if (error == GithubNetworkErrors.NOT_FOUND) {
+                        return@withContext UserProfileUiState.NotFound
+                    } else {
+                        return@withContext UserProfileUiState.Error(error)
+                    }
                 }
-            }
 
-            return@withContext UserProfileUiState.Found(apiResponse.body()!!)
+                return@withContext UserProfileUiState.Found(apiResponse.body()!!)
+            } catch (e: Exception) {
+                return@withContext UserProfileUiState.Error(GithubNetworkErrors.UNKNOWN)
+            }
         }
     }
 
@@ -58,9 +64,9 @@ class GithubUserRepository @Inject constructor(private val api: GithubServiceApi
 
     private fun getGithubApiError(errorBody: ResponseBody?): GithubNetworkErrors {
         val error = fromJson(errorBody?.string(), GithubErrorBody::class.java)
-        return when(error.message) {
+        return when (error.message) {
             GithubNetworkErrors.BAD_CREDENTIALS.message -> {
-               GithubNetworkErrors.BAD_CREDENTIALS
+                GithubNetworkErrors.BAD_CREDENTIALS
             }
 
             GithubNetworkErrors.NOT_FOUND.message -> {

@@ -10,15 +10,15 @@ import dev.aquiladvx.speerandroidassessment.common.hide
 import dev.aquiladvx.speerandroidassessment.common.observe
 import dev.aquiladvx.speerandroidassessment.common.show
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
-import dev.aquiladvx.speerandroidassessment.databinding.ActivityMainBinding
+import dev.aquiladvx.speerandroidassessment.databinding.ActivityUserProfileBinding
 import dev.aquiladvx.speerandroidassessment.ui.user_connections.ConnectionsDialog
 import timber.log.Timber
 
 @AndroidEntryPoint
 class UserProfileActivity : AppCompatActivity() {
 
-    private val binding: ActivityMainBinding by lazy {
-        ActivityMainBinding.inflate(layoutInflater)
+    private val binding: ActivityUserProfileBinding by lazy {
+        ActivityUserProfileBinding.inflate(layoutInflater)
     }
 
     private val viewModel: UserProfileViewModel by viewModels()
@@ -34,23 +34,41 @@ class UserProfileActivity : AppCompatActivity() {
     private fun userProfileObserver(result: UserProfileUiState) {
         when (result) {
             is UserProfileUiState.Loading -> {
-                //TODO skeleton loading.
-                Timber.d("loading")
+                showLoading()
             }
 
             is UserProfileUiState.Found -> {
+                hideLoading()
                 setUserProfileOnUi(result.userProfile)
             }
 
             is UserProfileUiState.NotFound -> {
+                hideLoading()
                 binding.profile.clProfile.hide()
                 binding.clNotFound.show()
             }
 
             is UserProfileUiState.Error -> {
                 //TODO error dialog
+                hideLoading()
                 Timber.tag("USER PROFILE ERROR").e(result.error.message)
             }
+        }
+    }
+
+    private fun showLoading() {
+        with(binding) {
+            sklProfile.slProfile.startShimmer()
+            sklProfile.slProfile.show()
+            profile.clProfile.hide()
+        }
+    }
+
+    private fun hideLoading() {
+        with(binding) {
+            sklProfile.slProfile.hideShimmer()
+            sklProfile.slProfile.hide()
+            profile.clProfile.show()
         }
     }
 
