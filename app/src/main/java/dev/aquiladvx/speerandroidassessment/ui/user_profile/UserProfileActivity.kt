@@ -4,16 +4,15 @@ import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
 import dev.aquiladvx.speerandroidassessment.R
 import dev.aquiladvx.speerandroidassessment.common.hide
 import dev.aquiladvx.speerandroidassessment.common.hideKeyboard
+import dev.aquiladvx.speerandroidassessment.common.loadImage
 import dev.aquiladvx.speerandroidassessment.common.observe
 import dev.aquiladvx.speerandroidassessment.common.show
 import dev.aquiladvx.speerandroidassessment.common.showErrorMessage
 import dev.aquiladvx.speerandroidassessment.data.entity.GithubUserProfile
-import dev.aquiladvx.speerandroidassessment.data.network.GithubNetworkErrors
 import dev.aquiladvx.speerandroidassessment.databinding.ActivityUserProfileBinding
 import dev.aquiladvx.speerandroidassessment.ui.user_connections.ConnectionsDialog
 
@@ -84,11 +83,7 @@ class UserProfileActivity : AppCompatActivity() {
         binding.etSearchUsername.setText(user.login)
         with(binding.profile) {
             clProfile.show()
-            Glide
-                .with(this@UserProfileActivity)
-                .load(user.avatarUrl)
-                .into(ivUserAvatar)
-
+            loadImage(user.avatarUrl, ivUserAvatar)
             tvUserName.text = user.name
             tvUserUsername.text = user.login
             tvUserDescription.text = user.bio
@@ -117,9 +112,9 @@ class UserProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun showConnectionDialog(connectionType: ConnectionsDialog.Companion.ConnectionType) {
+    private fun showConnectionsDialog(connectionsType: ConnectionsDialog.Companion.ConnectionType) {
         ConnectionsDialog(
-            connectionType,
+            connectionsType,
             viewModel.username.value!!
         )
             .setOnUserClickListener(::getUserProfile)
@@ -127,11 +122,11 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun showUserFollowingDialog() {
-        showConnectionDialog(ConnectionsDialog.Companion.ConnectionType.FOLLOWING)
+        showConnectionsDialog(ConnectionsDialog.Companion.ConnectionType.FOLLOWING)
     }
 
     private fun showUserFollowersDialog() {
-        showConnectionDialog(ConnectionsDialog.Companion.ConnectionType.FOLLOWERS)
+        showConnectionsDialog(ConnectionsDialog.Companion.ConnectionType.FOLLOWERS)
     }
 
     private fun getUserProfile(username: String? = null) {

@@ -1,4 +1,5 @@
 package dev.aquiladvx.speerandroidassessment.data.entity
+
 import com.google.gson.annotations.SerializedName
 
 data class GithubUserProfile(

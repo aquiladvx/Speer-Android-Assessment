@@ -102,7 +102,7 @@ class ConnectionsDialog(private val connectionType: ConnectionType, private val 
             }
 
             is UserConnectionsUiState.Error -> {
-               requireActivity().showErrorMessage(result.error)
+                requireActivity().showErrorMessage(result.error)
             }
 
         }

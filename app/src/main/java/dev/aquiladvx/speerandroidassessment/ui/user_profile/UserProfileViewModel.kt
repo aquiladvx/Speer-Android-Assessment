@@ -11,7 +11,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class UserProfileViewModel @Inject constructor(private val repository: GithubUserRepository): ViewModel() {
+class UserProfileViewModel @Inject constructor(private val repository: GithubUserRepository) :
+    ViewModel() {
 
     private val _userProfile = MutableLiveData<UserProfileUiState>()
     val userProfile: LiveData<UserProfileUiState> = _userProfile

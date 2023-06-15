@@ -5,7 +5,7 @@ import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
 @HiltAndroidApp
-class SpeerAndroidAssessmentApplication: Application() {
+class SpeerAndroidAssessmentApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
